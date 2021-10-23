@@ -2,34 +2,30 @@ package com.bignerdranch.android.criminalintent
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import java.util.*
 
 private const val TAG = "MainActivity"
+
 class MainActivity : AppCompatActivity(),
     CrimeListFragment.Callbacks{
+
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val currentFragment =
-            supportFragmentManager.findFragmentById(R.id.fragment_container)
-        if (currentFragment == null) {
-            val fragment = CrimeListFragment.newInstance()
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.fragment_container, fragment)
-                .commit()
-        }
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
     }
 
     override fun onCrimeSelected(crimeId: UUID) {
-        val fragment = CrimeFragment.newInstance(crimeId)
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
+        val args = Bundle().apply {
+            putSerializable(ARG_CRIME_ID, crimeId)
+        }
+        navController.navigate(R.id.action_crimeListFragment_to_crimeFragment, args)
     }
 }

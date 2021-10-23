@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProviders
 import java.util.*
 import androidx.lifecycle.Observer
 
-private const val ARG_CRIME_ID = "crime_id"
+const val ARG_CRIME_ID = "crime_id"
 private const val TAG = "CrimeFragment"
 
 class CrimeFragment : Fragment() {
