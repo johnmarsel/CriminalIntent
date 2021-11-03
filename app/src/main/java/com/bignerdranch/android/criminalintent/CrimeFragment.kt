@@ -2,6 +2,7 @@ package com.bignerdranch.android.criminalintent
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -12,31 +13,38 @@ import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import java.util.*
-import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import java.io.File
 
 const val ARG_CRIME_ID = "crime_id"
-private const val TAG = "CrimeFragment"
 private const val DIALOG_DATE = "DialogDate"
+private const val DIALOG_TIME = "DialogTime"
 private const val DIALOG_PHOTO = "DialogPhoto"
 private const val REQUEST_DATE = 0
+private const val REQUEST_TIME = 4
 private const val REQUEST_CONTACT = 1
 private const val REQUEST_PHOTO = 3
-private const val DATE_FORMAT = "EEE, MMM, dd"
+private const val DATE_FORMAT = "E, dd.MM.yyyy HH:mm:ss"
 private const val PERMISSION_REQUEST = 2
 
-class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks {
+class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks,
+    TimePickerFragment.Callbacks {
 
+    interface Callbacks {
+        fun onCrimeDeleted()
+    }
+
+    private var callbacks: Callbacks? = null
     private lateinit var crime: Crime
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
@@ -48,17 +56,25 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks {
     private lateinit var suspectDialButton: Button
     private lateinit var photoButton: ImageButton
     private lateinit var photoView: ImageView
+    private lateinit var dateTimePattern: String
+    private lateinit var toolbar: Toolbar
 
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeDetailViewModel::class.java) }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks?
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         crime = Crime()
         val crimeId: UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
-        // Загрузка преступления из базы данных
         crimeDetailViewModel.loadCrime(crimeId)
+        dateTimePattern = DateFormat.getBestDateTimePattern(resources.configuration.locale,
+            DATE_FORMAT)
     }
 
     override fun onCreateView(
@@ -81,9 +97,26 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val navController = findNavController()
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        toolbar = view.findViewById(R.id.toolbar) as Toolbar
+        toolbar.apply {
+            setupWithNavController(navController, appBarConfiguration)
+            setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.delete_crime -> {
+                    crimeDetailViewModel.deleteCrime(crime)
+                    callbacks?.onCrimeDeleted()
+                    true
+                }
+                else -> false
+            }
+        }
+        }
+
         crimeDetailViewModel.crimeLiveData.observe(
             viewLifecycleOwner,
-            Observer { crime ->
+            { crime ->
                 crime?.let {
                     this.crime = crime
                     photoFile = crimeDetailViewModel.getPhotoFile(crime)
@@ -131,6 +164,10 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks {
         }
 
         dateButton.setOnClickListener {
+            TimePickerFragment.newInstance(crime.date).apply {
+                setTargetFragment(this@CrimeFragment, REQUEST_TIME)
+                show(this@CrimeFragment.requireFragmentManager(), DIALOG_TIME)
+            }
             DatePickerFragment.newInstance(crime.date).apply {
                 setTargetFragment(this@CrimeFragment, REQUEST_DATE)
                 show(this@CrimeFragment.requireFragmentManager(), DIALOG_DATE)
@@ -217,6 +254,7 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks {
     override fun onStop() {
         super.onStop()
         crimeDetailViewModel.saveCrime(crime)
+        if (crime.title.isBlank()) crimeDetailViewModel.deleteCrime(crime)
     }
 
     override fun onDetach() {
@@ -230,9 +268,16 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks {
         updateUI()
     }
 
+    override fun onTimeSelected(hourOfDay: Int, minute: Int) {
+        crime.date.hours = hourOfDay
+        crime.date.minutes = minute
+        updateUI()
+    }
+
     private fun updateUI() {
+        toolbar.title = crime.title
         titleField.setText(crime.title)
-        dateButton.text = crime.date.toString()
+        dateButton.text = DateFormat.format(dateTimePattern, crime.date)
         solvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
@@ -328,7 +373,7 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks {
             getString(R.string.crime_report_unsolved)
         }
         val dateString = DateFormat.format(DATE_FORMAT, crime.date).toString()
-        var suspect = if (crime.suspect.isBlank()) {
+        val suspect = if (crime.suspect.isBlank()) {
             getString(R.string.crime_report_no_suspect)
         } else {
             getString(R.string.crime_report_suspect, crime.suspect)

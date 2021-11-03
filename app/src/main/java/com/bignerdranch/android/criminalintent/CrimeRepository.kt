@@ -43,6 +43,12 @@ class CrimeRepository private constructor(context: Context) {
         }
     }
 
+    fun deleteCrime(crime: Crime) {
+        executor.execute {
+            crimeDao.deleteCrime(crime)
+        }
+    }
+
     fun getPhotoFile(crime: Crime): File = File(filesDir, crime.photoFileName)
 
     companion object {

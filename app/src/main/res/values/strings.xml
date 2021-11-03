@@ -4,8 +4,6 @@
     <string name="crime_title_label">Title</string>
     <string name="crime_details_label">Details</string>
     <string name="crime_solved_label">Solved</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="new_crime">New Crime</string>
     <string name="no_data_available">No elements yet</string>
     <string name="crime_suspect_text">Choose Suspect</string>
@@ -20,4 +18,5 @@
     <string name="crime_report_suspect">the suspect is %s.</string>
     <string name="crime_report_subject">CriminalIntent Crime Report</string>
     <string name="send_report">Send crime report via</string>
+    <string name="delete_crime">Delete</string>
 </resources>

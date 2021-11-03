@@ -2,20 +2,21 @@ package com.bignerdranch.android.criminalintent
 
 import android.content.Context
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
-
-private const val TAG = "CrimeListFragment"
 
 class CrimeListFragment : Fragment() {
 
@@ -51,7 +52,6 @@ class CrimeListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_crime_list, container, false)
-
         emptyView = view.findViewById(R.id.empty_view)
         crimeRecyclerView =
             view.findViewById(R.id.crime_recycler_view) as RecyclerView
@@ -62,6 +62,24 @@ class CrimeListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val navController = findNavController()
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        val toolbar = view.findViewById(R.id.toolbar) as Toolbar
+        toolbar.apply {
+            setupWithNavController(navController, appBarConfiguration)
+            title = resources.getText(R.string.app_name)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.new_crime -> {
+                        val crime = Crime()
+                        crimeListViewModel.addCrime(crime)
+                        callbacks?.onCrimeSelected(crime.id)
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }
         crimeListViewModel.crimeListLiveData.observe(
             viewLifecycleOwner,
             { crimes ->
@@ -74,23 +92,6 @@ class CrimeListFragment : Fragment() {
     override fun onDetach() {
         super.onDetach()
         callbacks = null
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.fragment_crime_list, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.new_crime -> {
-                val crime = Crime()
-                crimeListViewModel.addCrime(crime)
-                callbacks?.onCrimeSelected(crime.id)
-                true
-            }
-            else -> return super.onOptionsItemSelected(item)
-        }
     }
 
     private fun updateUI(crimes: List<Crime>) {
@@ -113,6 +114,9 @@ class CrimeListFragment : Fragment() {
         private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
         private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
         private val solvedImageView: ImageView = itemView.findViewById(R.id.crime_solved)
+        private val dateTimePattern = DateFormat.getBestDateTimePattern(
+            resources.configuration.locale,
+            "E, dd.MM.yyyy HH:mm:ss")
 
         init {
             itemView.setOnClickListener(this)
@@ -121,7 +125,7 @@ class CrimeListFragment : Fragment() {
         fun bind(crime: Crime) {
             this.crime = crime
             titleTextView.text = this.crime.title
-            dateTextView.text = this.crime.date.toString()
+            dateTextView.text = DateFormat.format(dateTimePattern, this.crime.date)
             solvedImageView.visibility = if (crime.isSolved) {
                 View.VISIBLE
             } else {

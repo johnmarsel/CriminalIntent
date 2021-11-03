@@ -9,7 +9,7 @@ import java.util.*
 private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity(),
-    CrimeListFragment.Callbacks{
+    CrimeListFragment.Callbacks, CrimeFragment.Callbacks{
 
     private lateinit var navController: NavController
 
@@ -27,5 +27,9 @@ class MainActivity : AppCompatActivity(),
             putSerializable(ARG_CRIME_ID, crimeId)
         }
         navController.navigate(R.id.action_crimeListFragment_to_crimeFragment, args)
+    }
+
+    override fun onCrimeDeleted() {
+        navController.popBackStack()
     }
 }

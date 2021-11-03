@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CriminalIntent</string>
+    <string name="crime_title_hint">Введите что произошло</string>
+    <string name="crime_title_label">Заголовок</string>
+    <string name="crime_details_label">Детали</string>
+    <string name="crime_solved_label">Раскрыто</string>
+    <string name="new_crime">Новое преступление</string>
+    <string name="no_data_available">Список пуст</string>
+    <string name="crime_suspect_text">Выбрать подозреваемого</string>
+    <string name="crime_suspect_dial_text">Позвонить подозреваемому</string>
+    <string name="crime_report_text">Отправить отчет</string>
+    <string name="crime_report">%1$s!
+    Преступление произошло %2$s. %3$s и %4$s
+ </string>
+    <string name="crime_report_solved">Дело раскрыто</string>
+    <string name="crime_report_unsolved">Дело не раскрыто</string>
+    <string name="crime_report_no_suspect">подозреваемый не найден.</string>
+    <string name="crime_report_suspect">подозреваемый - %s.</string>
+    <string name="crime_report_subject">CriminalIntent отчет о преступлении</string>
+    <string name="send_report">Отправить отчет через</string>
+    <string name="delete_crime">Удалить</string>
+</resources>
