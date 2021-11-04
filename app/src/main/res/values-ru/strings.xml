@@ -20,4 +20,7 @@
     <string name="crime_report_subject">CriminalIntent отчет о преступлении</string>
     <string name="send_report">Отправить отчет через</string>
     <string name="delete_crime">Удалить</string>
+    <string name="crime_photo_button_description">Сделайте фото с места преступления</string>
+    <string name="crime_photo_no_image_description">Фото места преступления (отсутствует)</string>
+    <string name="crime_photo_image_description">Фото места преступления (присутствует)</string>
 </resources>

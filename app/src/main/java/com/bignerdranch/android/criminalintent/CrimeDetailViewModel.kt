@@ -25,7 +25,8 @@ class CrimeDetailViewModel() : ViewModel() {
         crimeRepository.updateCrime(crime)
     }
 
-    fun deleteCrime(crime: Crime) {
+    fun deleteCrime(crime: Crime, photoFile: File) {
+        photoFile.delete()
         crimeRepository.deleteCrime(crime)
     }
 

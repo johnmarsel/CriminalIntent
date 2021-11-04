@@ -105,7 +105,7 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks,
             setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.delete_crime -> {
-                    crimeDetailViewModel.deleteCrime(crime)
+                    crimeDetailViewModel.deleteCrime(crime, photoFile)
                     callbacks?.onCrimeDeleted()
                     true
                 }
@@ -254,7 +254,11 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks,
     override fun onStop() {
         super.onStop()
         crimeDetailViewModel.saveCrime(crime)
-        if (crime.title.isBlank()) crimeDetailViewModel.deleteCrime(crime)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (crime.title.isEmpty()) crimeDetailViewModel.deleteCrime(crime, photoFile)
     }
 
     override fun onDetach() {
@@ -295,8 +299,12 @@ class CrimeFragment : Fragment(),  DatePickerFragment.Callbacks,
         if (photoFile.exists()) {
             val bitmap = getScaledBitmap(photoFile.path, requireActivity())
             photoView.setImageBitmap(bitmap)
+            photoView.contentDescription =
+                getString(R.string.crime_photo_image_description)
         } else {
             photoView.setImageDrawable(null)
+            photoView.contentDescription =
+                getString(R.string.crime_photo_no_image_description)
         }
     }
 
