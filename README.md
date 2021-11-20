@@ -6,7 +6,7 @@ It's my training project.
 ## How to run it?
 Clone this project to your folder and then run it in Android Studio.
 ## Usage
-You can choose a suspect with your contacts, if you want you can make a call to suspect or send a report.
+You can choose a date of crime, a suspect with your contacts, if you want you can make a call to suspect or send a report.
 Also you can make a photo of the crime scene.
 
 ![Screenshots](https://github.com/johnmarsel/CriminalIntent/raw/master/screenshots/screenshot1.png) ![Screenshots](https://github.com/johnmarsel/CriminalIntent/raw/master/screenshots/screenshot2.png) 
